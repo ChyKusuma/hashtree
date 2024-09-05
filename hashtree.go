@@ -1,4 +1,4 @@
-package main
+package hashtree
 
 import (
 	"crypto/rand"
