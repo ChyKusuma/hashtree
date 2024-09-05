@@ -22,7 +22,6 @@ func computeHash(data []byte) []byte {
 	return hash[:]
 }
 
-// Build the hash tree from leaf nodes
 // BuildHashTree builds the hash tree from leaf nodes
 func BuildHashTree(leaves [][]byte) *HashTreeNode {
 	nodes := make([]*HashTreeNode, len(leaves))
