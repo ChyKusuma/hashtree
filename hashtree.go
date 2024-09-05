@@ -120,7 +120,7 @@ func main() {
 	}
 
 	// Build the Merkle tree from the generated leaves
-	root := buildHashTree(signatureParts)
+	root := BuildHashTree(signatureParts)
 	printRootHash(root)
 
 	// Save only the root hash to a file
