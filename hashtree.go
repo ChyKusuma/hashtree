@@ -23,7 +23,8 @@ func computeHash(data []byte) []byte {
 }
 
 // Build the hash tree from leaf nodes
-func buildHashTree(leaves [][]byte) *HashTreeNode {
+// BuildHashTree builds the hash tree from leaf nodes
+func BuildHashTree(leaves [][]byte) *HashTreeNode {
 	nodes := make([]*HashTreeNode, len(leaves))
 	for i, leaf := range leaves {
 		nodes[i] = &HashTreeNode{Hash: computeHash(leaf)}
