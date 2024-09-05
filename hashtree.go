@@ -89,7 +89,7 @@ func printRootHash(root *HashTreeNode) {
 }
 
 // Example usage
-func main() {
+func ExampleUsage() {
 	// Open LevelDB
 	db, err := leveldb.OpenFile("leafdata", nil)
 	if err != nil {
