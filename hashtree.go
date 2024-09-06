@@ -5,7 +5,6 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"io/ioutil"
-	"log"
 
 	"github.com/syndtr/goleveldb/leveldb"
 )
@@ -48,7 +47,7 @@ func BuildHashTree(leaves [][]byte) *HashTreeNode {
 }
 
 // Generate random data of specified length
-func generateRandomData(size int) ([]byte, error) {
+func GenerateRandomData(size int) ([]byte, error) {
 	data := make([]byte, size)
 	_, err := rand.Read(data)
 	if err != nil {
@@ -58,17 +57,17 @@ func generateRandomData(size int) ([]byte, error) {
 }
 
 // Save root hash to file
-func saveRootHashToFile(root *HashTreeNode, filename string) error {
+func SaveRootHashToFile(root *HashTreeNode, filename string) error {
 	return ioutil.WriteFile(filename, root.Hash, 0644)
 }
 
 // Load root hash from file
-func loadRootHashFromFile(filename string) ([]byte, error) {
+func LoadRootHashFromFile(filename string) ([]byte, error) {
 	return ioutil.ReadFile(filename)
 }
 
 // Save leaf node data to LevelDB
-func saveLeavesToDB(db *leveldb.DB, leaves [][]byte) error {
+func SaveLeavesToDB(db *leveldb.DB, leaves [][]byte) error {
 	for i, leaf := range leaves {
 		key := fmt.Sprintf("leaf-%d", i)
 		err := db.Put([]byte(key), leaf, nil)
@@ -80,11 +79,11 @@ func saveLeavesToDB(db *leveldb.DB, leaves [][]byte) error {
 }
 
 // Fetch leaf from LevelDB
-func fetchLeafFromDB(db *leveldb.DB, key string) ([]byte, error) {
+func FetchLeafFromDB(db *leveldb.DB, key string) ([]byte, error) {
 	return db.Get([]byte(key), nil)
 }
 
 // Print the root hash of the hash tree
-func printRootHash(root *HashTreeNode) {
+func PrintRootHash(root *HashTreeNode) {
 	fmt.Printf("Root Hash: %x\n", root.Hash)
 }
