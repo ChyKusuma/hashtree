@@ -12,7 +12,7 @@ import (
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
-const maxFileSize = 1 << 30 // 1 GiB max file size for memory mapping
+var maxFileSize = 1 << 30 // 1 GiB max file size for memory mapping
 
 // HashTreeNode represents a node in the hash tree
 type HashTreeNode struct {
@@ -107,17 +107,8 @@ func SaveLeavesBatchToDB(db *leveldb.DB, leaves [][]byte) error {
 
 // Handle concurrent access to LevelDB (basic example)
 func FetchLeafConcurrent(db *leveldb.DB, key string) ([]byte, error) {
-	var value []byte
-	err := db.View(func(txn *leveldb.Transaction) error {
-		var err error
-		value, err = txn.Get([]byte(key), nil) // Read from LevelDB transaction
-		return err
-	})
-	return value, err
+	return db.Get([]byte(key), nil) // Retrieve leaf node from LevelDB
 }
-
-// Define a suitable maxFileSize based on your needs and system constraints
-const maxFileSize = 1 << 30 // 1 GiB max file size for memory mapping
 
 // Update maxFileSize based on specific needs
 func setMaxFileSize(sizeInGiB int) {
@@ -143,7 +134,8 @@ func MemoryMapFile(filename string) ([]byte, error) {
 	}
 
 	size := stat.Size()
-	if size > maxFileSize {
+	// Convert maxFileSize to int64 for comparison
+	if size > int64(maxFileSize) {
 		return nil, fmt.Errorf("file size exceeds maximum limit of %d bytes", maxFileSize)
 	}
 
