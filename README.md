@@ -1,37 +1,49 @@
 # hashtree
 
-When dealing with a large signature size (over 49,000 bytes), managing it efficiently becomes important. Using a Merkle tree structure, as you're doing, can help reduce the data that needs to be transferred or verified at once. Here are some strategies to manage large signature sizes more efficiently:
+Why Use a Hash Tree for Large Signatures
+Handling large signatures, such as those over 49,000 bytes, can be challenging due to their size and complexity. Here’s why a hash tree (also known as a Merkle tree) is useful for managing such large data:
 
-1. Merkle Tree Structure for Efficient Verification
-A Merkle tree allows you to split the large signature into smaller parts, compute the hash of each part, and then use these hashes to build a tree. You store only the root hash, and when you need to verify a signature, you don't need to load the entire signature — just the relevant leaves (or parts) for verification. This reduces memory usage and makes verification more efficient.
+1. Efficient Verification:
+A hash tree allows you to efficiently verify the integrity of large data sets. Instead of checking the entire signature, you can verify smaller chunks, which reduces computational overhead.
 
-2. Dynamic Node Fetching
-Storing only the root hash and fetching leaf nodes dynamically from a LevelDB or other key-value store (as you're doing) is useful because it allows you to only load the necessary parts of the signature into memory. This is particularly useful when dealing with large signatures, as you avoid loading the full 49,000 bytes at once.
+2. Reduced Size for Comparison:
+By breaking the data into smaller pieces and hashing them, you can reduce the size of the data that needs to be compared. The root hash of the tree represents the entire dataset, so you only need to handle the root hash for comparison.
 
-3. Batching and Parallel Processing
-You can split the large signature into smaller, more manageable chunks. By using a Merkle tree, you could perform the verification of individual parts in parallel, which can significantly speed up processing. This is especially relevant for very large signatures, where verifying them as a whole can be slow.
+3.  Parallel Processing:
+You can process different parts of the data in parallel, which speeds up hashing and verification. The structure of the hash tree naturally supports parallel computation, as each level of the tree can be processed independently.
 
-4. Compressing the Signature
-If the signature size is still too large after dividing it into smaller parts, you might want to consider applying compression to the data. Algorithms such as GZIP or LZ4 can be used to compress the individual chunks of data before storing them in LevelDB, thus reducing storage requirements.
+4. Error Detection:
+The hash tree structure helps in detecting any changes or corruption in the data. Even a small modification in the original data will result in a completely different root hash, making it easy to spot discrepancies.
 
-5. Avoid Repeated Full Signature Verification
-By storing intermediate nodes (or only fetching them on-demand), you can avoid repeatedly verifying the entire signature. You only need to verify the necessary parts (the relevant leaf nodes and the path to the root).
+How It Works
+1. Leaf Nodes:
+Each leaf node in the hash tree represents a small chunk of the signature. You compute the hash of each chunk and create leaf nodes with these hashes.
 
-How to Use Merkle Trees for Signature Management
-Leaf nodes represent smaller parts of your signature (you can split the large signature into smaller parts).
-Internal nodes represent hashes of the concatenated children.
-Root hash is the single point that you store and use to verify the integrity of the entire signature tree.
-Here’s how this fits into your current program:
+2. Building the Tree:
+The tree is built in levels. At each level, pairs of nodes are combined (concatenated) and hashed to create a new parent node. This process continues until you reach the root node.
 
-Split the Signature into multiple leaves (small chunks of the full signature).
-Store Leaves in LevelDB: You already store the leaves in LevelDB, so you can fetch and verify only the required parts dynamically.
-Verify Efficiently: When verifying, you only need to retrieve the required leaves and reconstruct the path to the root hash, rather than loading the entire signature.
-Benefits:
-Reduced Memory Usage: By not loading the entire 49,000-byte signature, you save memory.
-Improved Verification Speed: Verifying smaller parts allows you to optimize and potentially parallelize the process.
-Next Steps:
-If you're looking to further improve the signature management:
+3. Root Hash:
+The root node of the hash tree contains the hash of the entire dataset. This single hash value summarizes the integrity of all the leaf nodes below it.
+Storing and Accessing Data:
+In your implementation, leaf nodes can be stored in a LevelDB database. This allows you to efficiently manage and retrieve large datasets by storing each leaf separately.
 
-Compress Leaf Data: Add a compression step before storing the leaves in LevelDB.
-Parallelize Verification: If you're verifying the entire tree, consider parallel processing of the leaf nodes.
-This approach will help you efficiently manage and verify large signatures using Merkle trees while leveraging LevelDB for dynamic fetching.
+4. Memory Mapping:
+For large files, memory mapping (using syscall.Mmap) is used to handle file access efficiently. This method allows you to work with large files without loading them entirely into memory.
+
+Example Walkthrough
+1. Generate Data:
+Random data is generated and split into chunks (leaf nodes).
+
+2. Compute Hashes:
+Compute the SHA-256 hash for each chunk.
+
+3. Build the Tree:
+Combine hashes in pairs, compute new hashes for each combined pair, and repeat until a single root hash is obtained.
+
+4. Store Data:
+Save the leaf nodes to LevelDB and the root hash to a file.
+
+5. Verify Data:
+To verify, you can recompute the root hash from the leaf nodes and compare it to the stored root hash.
+
+Using a hash tree helps manage and verify large signatures efficiently, making it an effective solution for handling and processing large amounts of data.
