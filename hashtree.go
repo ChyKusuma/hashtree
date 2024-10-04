@@ -85,6 +85,26 @@ func SaveLeavesToDB(db *leveldb.DB, leaves [][]byte) error {
 	return nil
 }
 
+// Check if a signature already exists in LevelDB
+func CheckSignatureExists(db *leveldb.DB, signature []byte) (bool, error) {
+	hash := computeHash(signature)           // Compute hash of the signature
+	key := fmt.Sprintf("signature-%x", hash) // Create a key based on the signature's hash
+	_, err := db.Get([]byte(key), nil)       // Try to fetch it
+	if err == leveldb.ErrNotFound {
+		return false, nil // Signature does not exist
+	} else if err != nil {
+		return false, err // Some other error
+	}
+	return true, nil // Signature exists
+}
+
+// Save a new signature to LevelDB
+func SaveSignatureToDB(db *leveldb.DB, signature []byte) error {
+	hash := computeHash(signature)             // Compute hash of the signature
+	key := fmt.Sprintf("signature-%x", hash)   // Create a key based on the signature's hash
+	return db.Put([]byte(key), signature, nil) // Store the signature
+}
+
 // Fetch leaf from LevelDB
 func FetchLeafFromDB(db *leveldb.DB, key string) ([]byte, error) {
 	return db.Get([]byte(key), nil) // Retrieve leaf node from LevelDB
