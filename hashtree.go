@@ -95,6 +95,18 @@ func PrintRootHash(root *HashTreeNode) {
 	fmt.Printf("Root Hash: %x\n", root.Hash) // Print root hash
 }
 
+// PruneOldLeaves removes old leaf nodes from the LevelDB
+func PruneOldLeaves(db *leveldb.DB, numLeaves int) error {
+	for i := 0; i < numLeaves; i++ {
+		key := fmt.Sprintf("leaf-%d", i)
+		err := db.Delete([]byte(key), nil) // Remove old leaf node
+		if err != nil && err != leveldb.ErrNotFound {
+			return err // Ignore not found error
+		}
+	}
+	return nil
+}
+
 // Batch operations for LevelDB to improve performance
 func SaveLeavesBatchToDB(db *leveldb.DB, leaves [][]byte) error {
 	batch := new(leveldb.Batch)
